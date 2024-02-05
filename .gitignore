@@ -1,0 +1,21 @@
+# General
+.DS_Store
+
+# Thumbnails
+._*
+
+# Surroundgen
+input/*
+output/*
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Python Egg
+*.egg-info/
+*.egg
+
+# Python dist and build
+dist/
+build/
