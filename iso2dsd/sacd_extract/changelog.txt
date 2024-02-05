@@ -1,0 +1,210 @@
+
+
+Enhanced sacd_extract client for Windows and Linux by euflo
+
+Latest Version:0.3.9.3-107-g01c90ddafb0256f3eb194d2c62e7ee5ba14b1c12
+- fixed huge title album/disc bug (when lenght is bigger than 255 chars). 
+  Now each path components are created with lenght limit at 255 chars (Linux/macOS/Windows affected);
+- the size of input ISO file is now checked against corruption;
+- metadata xml file is created first.  
+
+Windows sacd_extract.exe sha256:eeb4b18514ba9cfcb354a9670e7eedf4da646117a4d81edb852e2b9084f92af4
+Linux sacd_extract sha256:2f3a280c73d0e8f49c5ad2071d4949e1f621a7987d758dc1123e886746c70bab
+macOS sacd_extract sha256:0f9b5bd0b99d2e23c71a85527ca95c5bb61ef3915e353c7be30d335ee434e3ee
+-----------------------------------------------------------------------------------------------------------
+Version: 0.3.9.3-99-gfe1a337f9fc609d4e0ae84b63196c3fc4cf55a72
+- fixed warning of missing last audioframe on last track (when pauses=0);
+- added checking if all adioframes are consecutive;
+
+Windows sacd_extract.exe sha256:25f242f31acc117087d419e6d585318e838d40694dfda8778910cc7791239b82
+Linux sacd_extract sha256:e09b9d272129067f2e55f2b9961866cf2d66d8307d56c6d430bb95f299a886ff
+macOS sacd_extract sha256:7c3d16d118d0a057cd7e7aa5dbfa345b33a575e05f66f49f1fc7c89e787b6d73 (build by MikeyFresh)
+-----------------------------------------------------------------------------------------------------------
+
+Version:0.3.9.3-94-g8203e664011624e627da76e39de1bb6e55543872 (macOS only)
+- same with 0.3.9.3-93, but is build to runs on all version of macOS.
+macOS sacd_extract sha256:0036967a0d187c9f9864ce045ae20180709b57e05b85f26d0332bd4a374fbd60 (build by MikeyFresh)
+-----------------------------------------------------------------------------------------------------------
+
+Version: 0.3.9.3-93-gbd0a00d35a01f9556a406c6c113dc31a84af2544
+
+- fixed ending dot bug (in creating folder names from titles of albums containing ending dot - Windows). Now there are trimmed out;
+- added new check for illegal char code in metadata's tracks;
+- now unsafe chars are replaced with '_' instead of spaces (when creating folders & file names).
+
+Windows sacd_extract.exe sha256:aee1333b11276832a5642c440ab217cb2255ec7aece91adff3869835931382c9
+Linux sacd_extract sha256:cef9bfd0b900e8cf8c54e64e13f294993772312cfacd4b625075ed8b55d0478d
+macOS(min 10.15 ver.)  sacd_extract sha256:4c88ec3f4c62609122b96d1f680f864177793ef0330a925d16dedc7ebbfe0189
+-----------------------------------------------------------------------------------------------------------
+
+Version: sacd_extract 0.3.9.3-89-ga337cb3d83e2f934743a699e1606c47df1f1dfd8
+
+- minor bug fixed only when running in Windows cmd prompt and the output folder  (-o or -y option) is not specified, getting error message 'Directory can't be created'. Now, by default, if the output folder is empty then will be set to the current directory (in Windows we must use absolute paths).
+
+
+Windows sacd_extract.exe sha256:085cd20f1d918eeced3f5154b2f23be51af0af550fa2f712da40e0582d4ed824
+Linux sacd_extract sha256:9bebd7a5e50899951571eaac056c9592a4114e342b42c5a0212399b7e158cd24
+macOS sacd_extract sha256:
+-----------------------------------------------------------------------------------------------------------
+
+Version: sacd_extract 0.3.9.3-88-g019177f93a3d3265e4c1c01ae1811880bbefbfbc
+
+- minor bug fixed of wrong variables assignation (from original fork). When these metadata are present on SACD: area_description, area copyright, area description_phonetic or area copyright_phonetic, all are incorrectly assigned to the same variable area.description.
+
+Windows sacd_extract.exe sha256:e663e7d9140de537205cdb3d517b2063b0bb4e2ab5eafc5b6c19e5f3e2808b56
+Linux sacd_extract sha256:2748428a0a5fe7642e2b7a4462ab220a3713d805470a7bdbecb97ef6953343e7
+macOS sacd_extract sha256:5ec37947c4986a795b57232067f1894c0db4fe413211ee4720d000324e52def1
+-----------------------------------------------------------------------------------------------------------
+
+Version: sacd_extract 0.3.9.3-87-g5b241044670a8885fc53246693e05bb81e249fb9
+
+- added long path support (>260 chars) only for Windows7/8/10 platforms;
+- minor changes to Performer option (if Performer asked to be inserted in filename but didn't exists on disc Album Artist or Disc Artist is used instead. 'unknown performer' is used as a last resort);
+
+Windows sacd_extract.exe sha256:ed48e578f720c34c151910827fbd35d83768ba49607efd4af66a6e916f15cb76
+
+Linux sacd_extract sha256:a449e4e13b8c7252b25afe866ddb47f1ef5a9dee1634104d7905b8495f2a640b
+
+
+
+-----------------------------------------------------------------------------------------------------------
+
+Version: sacd_extract 0.3.9.3-75-g38e44737b25a339ca45cc8452153269474d2b7c9
+
+- changed in how the content of TPE1 (Artist name) of ID3 tag is filled. If Disc/Album artist or Performer are missing from the SACD, then the TPE1 is no longer created; 
+- fixed a bug in concurrent ISO+DSF/DSDIFF processing mode (when folders are not identical);
+
+
+Windows sacd_extract.exe sha256:ba58a0a042423aefc658102263d8c5a72ee3dd95254ae72e6808c07aa13d59bc
+
+Linux sacd_extract sha256:44ac5e4b2c6c7469bac99d45c8a7d849e80946b2c5309b0ee8824d8341f809d0
+
+macOS sacd_extract sha256:5ec37947c4986a795b57232067f1894c0db4fe413211ee4720d000324e52def1 (build with help of Nexus3. Thanks!)
+
+-----------------------------------------------------------------------------------------------------------
+
+
+Version: sacd_extract 0.3.9.3-71-g781ecde73214576cf7dee777ed07511f98f7784d
+- added UTF-16 encodings with BOM for ID3v2.3 tags;
+- added id3tag=3 option for creating DSF files with ID3V2.3 tags and string encodings ISO-8859-1 (ASCII);
+	The ID3 tags will be created:
+	- (id3tag=1) in ID3V2.3 version with full metadata. String encodings is UTF-16 with BOM (UCS-2);
+	- (id3tag=2) in ID3V2.3 version with minimal medatadata*. String encodings is UTF-16 with BOM (UCS-2); 
+	- (id3tag=3) in ID3V2.3 version with full metadata. String encodings is ISO-8859-1 (ASCII);
+	- (id3tag=4) in ID3V2.4 version with full metadata. String encodings is UTF-8;
+	- (id3tag=5) in ID3V2.4 version with minimal metadata*. String encodings is UTF-8;
+	- (id3tag=0)  ID3tag will not be created (for testing and experimental purpose).   
+- now the default format for ID3 tags will be ID3v2.4 format (with UTF-8 encodings).
+
+Note: * minimal metadata contains only 4 elements: Track Title, Album Title, Artist Name and Track Number.
+
+Windows sacd_extract.exe sha256: 60931869f3b02ff97d0ae04da7763db955cf9707d032426e3066171d7bb07b81
+Linux sacd_extract sha256: 8662c6411ec75043f50c77325c5c5f2c30770b03a2407315525500cf58a9eba9
+-----------------------------------------------------------------------------------------------------------
+
+
+Version: 0.3.9.3-63-g077212b4b0e4aa2c1ff1cd53651cc4af85e58f3d Release Candidate
+- added id3tag=0 (or =1, =2, =4, =5) option. At DSF conversion the ID3 tags will be created:
+	- (=1) in ID3V2.3 version with full metadata (Default) or with minimal medatadata* (=2);
+	- (=4) in ID3V2.4 version with full metadata  or with minimal medatadata* (=5);
+	- if =0 then ID3tag will not be created (for testing and experimental purpose).    
+
+	*Minimal metadata contains only 4 elements: Track Title, Album Title, Artist Name and Track Number.
+
+- addedd logging=1 option :logging will be activated. All messages during execution of sacd_extract will be saved in 'logfile-sacd_extract.txt'.
+
+sacd_extract.exe sha256: e56b3a31c4d4a1c41b587963a1f62dbdd47987324c02b221bfa2adb6ec8770bf
+Linux sacd_extract sha256: f6c156c8d8629854a292b0174046928bd12b6cde4c704ca29660adcfce4c2fe5
+-------------------------------------------------------------------------------------------------------------
+
+Version: 0.3.9.3-51-gdeed25c3d4515e9d878c3e855cb72324958aafdf pre-release
+- added concatenation option -k (--concatenate). Used in conjunction with track selection to concatenate selected tracks. Designed only for DSF format. Also, concatenate option can be set in 'sacd_extract.cfg' file as 'concatenate=1'. This allow to work ok with SACDExtractGui; Padding-less option for concatenation can be set also in 'sacd_extract.cfg' (to override the same option in SACDExtractGui which is disabled when tracks selection is enabled). Example 'nopad=0';  
+- fixed a bug in ID3 tag (where missing a null terminal in id3 tag text frames);
+- ID3 tag are using now UTF-8 encoding;
+- now 'artist' -A (--artist), 'performer' -a (--performer) and 'pauses' -b (--pauses) options can be declared in command line; 
+
+sacd_extract.exe sha256: e0f909748b427b9659b9393c2bc0fb8b676a98d85295b24d84b549d4265b350b
+Linux sacd_extract sha256: 3fa8e56d2a5d395b93cf4f8af50accff10dc8676367fee1229fac4e922ffc477
+----------------------------------------------------------------------------------------------------------
+
+
+Version: 0.3.9.3-30-g045865607bafe3c5037f0a883aec82aec9c20d6d
+- fixed -z (--dsf-nopad) not working;
+- changed the name of option 'audio_frame_trimming=1' into 'pauses'. When 'pauses=1' then pauses are included in tracks.
+
+sacd_extract.exe sha256: 7da2c6c4c4e0e3d6974fc9c68b8f6f095a38ccf8248c5997c6d8428b2270700e
+Linux sacd_extract sha256: 2544f62c6b4e516dd929dbb5dd768021bd61c8a62d0dd7cb452579196c9da546
+
+--------------------------------------------------------------------------
+Version: 0.3.9.3-23-gb562b812f5984d6d181dd21961d422c28484c0aa pre-release
+-  for dsf/dff option, audioframes counter is added for each tracks and compares with total duration to see if it misses one.  
+
+sacd_extract.exe sha256: 48d0902005637e06fae55f7656eddd954a87e990fda0bd04e13ba6a3b6c990d6
+Linux sacd_extract sha256: e6075ca23f7ce4cffdf804d4c49cdfb57923e32fa33c6a14b1df49250be6ab73
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+Version: 0.3.9.3-17-g80f9b52d9a211b52a7b1f019b4882c81a3a4f6b7 pre-release
+
+Binaries compiled with cross compiler mingw64 for Windows (64bit) & Gnu 7.4.0 for Linux.
+- fixed infinite loop 99% when iso files are corrupted;
+- added Performer tag to dsf files;
+- multi-byte chars in filenames is supported for Windows when input files are iso (using wmain);
+- better management in creating folders/files/tracks names (including albums with multiple discs);
+- folders are created like this: Album name/(Disc no)/(Stereo or 5ch or 6ch). If configuration file sacd_extract.cfg exist in working folder of app(which can be shown with -v option) and has text lines: 'artist=1' (and/or 'performer=1') it adds artist at the name of folder and/or adds performer at the filename of tracks;
+- changed priority in title/artist extracting metadata. Now disc_title/disc_artist came first instead of album_title/album_artist (useful in case of multiple discs of an album);
+- added -w (--concurrent) for compatibility with SACDExtractGUI;
+- added -o (--output-dir[=DIR] ) and -y (--output-dir-conc[=DIR]) options for setting explicit output folder (for compatibility with SACDExtractGUI);
+- for DSF/DFF files, the pops/crackles noise is reduced by trimming frames at track boundaries;
+- audio frames are trimmed out (based on timecode) at boundaries to reflect the correct playing time of tracks specified in Tracklist. This is done for DSF/DFF files (no for DFF-EM);
+- eliminates crashes when disk for output is full;
+- corrected behavior in case of discs with only one multi-channel area (with no stereo area);
+- added total play time for each area when printing disc info;
+- now it strips out ending slash or backslash, if exists, at --output-dir or --output-dir-conc to be compatible with BatchEncoder;
+- added xml metadata file export option (is activated when Cue sheet is checked). Libray libxml2 is used;
+- added more integrity checks of the audio frames; 
+- fixed 2 BUGS which can make pops/crackles noises at the end of DSF/DFF tracks;
+- added -z (--dsf-nopad) option, (now is fully compatible with SACDExtractGUI);
+- added 'audio_frame_trimming=1' option in sacd_extract.cfg (see above 'audio frames are trimmed out....').
+
+sacd_extract.exe sha256: 1bebc344cd11b9828a8a6743984303961a7c445e6d6134dc43f1b0448952b31d
+Linux sacd_extract sha256: 5bc924d275a15121e777a7550703920725ddcb2e9813eb796bbee03e9c113372
+
+
+
+version 0.3.7
+
+    - fixed a bug where arranger phonetic was referenced incorrectly during print (-P)
+    - option to allow individual dsf/dsdiff track extraction
+    - added (foobar) compatible escaping to cuesheets
+    - added user optional output filename/folder (last parameter)
+
+version 0.3.6
+
+    - network speed improvement
+    - added native OS X support
+    - gapless is on by default for individual tracks
+    - fixed issue where CUE export wrote to wrong filename
+
+version 0.3.5
+
+    - added ID3 tags to Edit Master for multiple ID3 tagging
+    - added option to export individual CUE Sheets
+    - fixed DSTI table where DST Edit Master > 2GB
+    - fixed SACD to ID3 genre conversion table
+
+version 0.3.4 (bug fix release, please update if running 0.3.3)
+
+    - fixed a bug where DSTI was incorrectly part of DSD chunk
+
+version 0.3.3 (bug fix release, please update if running 0.3.2)
+
+    - fixed a bug where a wrong DSDIFF header was written for edit masters
+
+version 0.3.2
+
+    - added DSDIFF Edit Master (single DSD file) support
+    - added CUE Sheet support for Edit Master
+    - added DST frame buffer overflow protection
+    - added DST frame index chunk support
+    - removed gapless support (replaced by DSDIFF Edit Master)
+    - merged Maxims optimized FIR decoder
