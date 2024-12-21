@@ -19,3 +19,18 @@ __pycache__/
 # Python dist and build
 dist/
 build/
+
+# Audio files
+*.wav
+*.flac
+*.m4a
+*.mka
+*.mkv
+*.mp3
+*.mp4
+*.mlp
+*.ec3
+*.eac3
+*.ac3
+*.dts
+*.truehd
