@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
 import argparse
-import subprocess
+import json
 import os
+import re
+import subprocess
 from pathlib import Path
 import unicodedata
 
@@ -12,6 +14,12 @@ SUPPORTED_FILES = [
     ".flac",
     ".m4a",
 ]  # TODO: .m4a might be lossy -> double check if codec is TrueHD
+
+ORTF_3D_LAYOUT = "ortf-3d"
+ORTF_3D_CHANNELS = ("L", "R", "LS", "RS", "Lh", "Rh", "LSh", "RSh")
+ORTF_3D_CHANNEL_SIGNATURE = re.compile(
+    r"(?:^|[-_])l,r,ls,rs,lh,rh,lsh,rsh(?:[-_]|$)", re.IGNORECASE
+)
 
 INSTALL_DIR = Path(__file__).parent.absolute()
 PROCESS_DIR = os.getcwd()
@@ -33,9 +41,20 @@ parser.add_argument(
     else ".",
     help="the path to the output folder",
 )
+parser.add_argument(
+    "--layout",
+    dest="CHANNEL_LAYOUT",
+    choices=("auto", "7.1", ORTF_3D_LAYOUT),
+    default="auto",
+    help=(
+        "the input channel layout; ORTF 3D is automatically detected from "
+        "recognized filenames"
+    ),
+)
 args = parser.parse_args()
 
 INPUT_PATH = args.POSITIONAL_INPUT_PATH or args.INPUT_PATH
+CHANNEL_LAYOUT_OVERRIDE = args.CHANNEL_LAYOUT
 OUTPUT_PATH = (
     args.OUTPUT_PATH
     if os.path.isabs(args.OUTPUT_PATH)
@@ -50,7 +69,58 @@ def strip_accents(text):
     return str(text)
 
 
+def is_ortf_3d_file(input_path):
+    stem = os.path.splitext(os.path.basename(input_path))[0]
+
+    if ORTF_3D_CHANNEL_SIGNATURE.search(stem):
+        return True
+
+    normalized_stem = re.sub(r"[^a-z0-9]", "", stem.lower())
+    return "ortf3d" in normalized_stem
+
+
+def split_ortf_3d_channels():
+    split_inputs = "".join(f"[ortf_input_{index}]" for index in range(8))
+    filters = [f"[0:a:0]asplit=8{split_inputs}"]
+    filters.extend(
+        f"[ortf_input_{index}]pan=mono|c0=c{index}[ortf_output_{index}]"
+        for index in range(8)
+    )
+
+    command = [
+        "ffmpeg",
+        "-guess_layout_max",
+        "0",
+        "-i",
+        INPUT_PATH,
+        "-filter_complex",
+        ";".join(filters),
+    ]
+
+    for index, channel_name in enumerate(ORTF_3D_CHANNELS):
+        command.extend(
+            [
+                "-map",
+                f"[ortf_output_{index}]",
+                "-c:a",
+                CODEC,
+                os.path.join(
+                    OUTPUT_PATH,
+                    FILE_NAME,
+                    f"{FILE_NAME} [{index + 1} {channel_name}].wav",
+                ),
+            ]
+        )
+
+    command.append("-y")
+    subprocess.run(command, check=True)
+
+
 def split_channels(channel_layout):
+    if channel_layout == ORTF_3D_LAYOUT:
+        split_ortf_3d_channels()
+        return
+
     if channel_layout == "quad":
         subprocess.run(
             [
@@ -248,7 +318,7 @@ def get_audio_channels_info():
                 ]
             )
         )
-        channel_layout = subprocess.check_output(
+        probed_layout = subprocess.check_output(
             [
                 "ffprobe",
                 "-v",
@@ -261,17 +331,27 @@ def get_audio_channels_info():
                 "default=noprint_wrappers=1:nokey=1",
                 INPUT_PATH,
             ]
-        ).decode("UTF-8")
+        ).decode("UTF-8").strip()
+
+        if CHANNEL_LAYOUT_OVERRIDE != "auto":
+            if channels != 8:
+                raise ValueError(
+                    f"{CHANNEL_LAYOUT_OVERRIDE} requires exactly 8 channels; "
+                    f"found {channels}"
+                )
+            return channels, CHANNEL_LAYOUT_OVERRIDE
+
+        if channels == 8 and is_ortf_3d_file(INPUT_PATH):
+            return channels, ORTF_3D_LAYOUT
+
         return (
             channels,
             "quad"
-            if "quad" in channel_layout
+            if "quad" in probed_layout
             else "5.1"
-            if "5.1" in channel_layout
+            if "5.1" in probed_layout
             else "7.1"
-            if "7.1" in channel_layout
-            else "7.1"
-            if channels == 8 and FILE_EXTENSION == ".wav"
+            if "7.1" in probed_layout
             else None,
         )
     except subprocess.CalledProcessError as e:
@@ -279,10 +359,43 @@ def get_audio_channels_info():
         return None, None
 
 
-def get_codec():
+def get_audio_stream_info():
+    output = subprocess.check_output(
+        [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "a:0",
+            "-show_entries",
+            "stream=codec_name,sample_fmt,bits_per_sample,bits_per_raw_sample",
+            "-of",
+            "json",
+            INPUT_PATH,
+        ]
+    )
+
+    try:
+        streams = json.loads(output).get("streams", [])
+    except (json.JSONDecodeError, UnicodeDecodeError) as error:
+        raise ValueError("FFprobe returned invalid audio stream information") from error
+
+    if not streams:
+        raise ValueError("FFprobe did not return an audio stream")
+
+    return streams[0]
+
+
+def get_codec(stream_info=None):
     print("Getting codec...")
 
-    if BIT_DEPTH == 16:
+    source_codec = (stream_info or {}).get("codec_name")
+
+    if source_codec in {"pcm_f32le", "pcm_f32be"}:
+        codec = "pcm_f32le"
+    elif source_codec in {"pcm_f64le", "pcm_f64be"}:
+        codec = "pcm_f64le"
+    elif BIT_DEPTH == 16:
         codec = "pcm_s16le"
     elif BIT_DEPTH == 24:
         codec = "pcm_s24le"
@@ -297,25 +410,25 @@ def get_codec():
     return codec
 
 
-def get_bit_depth():
+def get_bit_depth(stream_info=None):
     print("Extracting bit depth...")
 
-    bit_depth = int(
-        subprocess.check_output(
-            [
-                "ffprobe",
-                "-v",
-                "error",
-                "-select_streams",
-                "a",
-                "-show_entries",
-                "stream=bits_per_raw_sample",
-                "-of",
-                "default=noprint_wrappers=1:nokey=1",
-                INPUT_PATH,
-            ]
-        ).split()[0]
-    )
+    if stream_info is None:
+        stream_info = get_audio_stream_info()
+
+    bit_depth = None
+    for field in ("bits_per_raw_sample", "bits_per_sample"):
+        try:
+            candidate = int(stream_info.get(field, 0))
+        except (TypeError, ValueError):
+            continue
+
+        if candidate > 0:
+            bit_depth = candidate
+            break
+
+    if bit_depth is None:
+        raise ValueError("Unable to determine audio bit depth from FFprobe output")
 
     print(f"bits_per_sample={bit_depth}")
     print("Done.")
@@ -335,7 +448,10 @@ def main():
 
     if channels is not None and channel_layout is not None:
         print(f"Number of channels: {channels}")
-        print(f"Channel layout: {channel_layout}")
+        if channel_layout == ORTF_3D_LAYOUT:
+            print(f"Channel layout: ORTF 3D ({', '.join(ORTF_3D_CHANNELS)})")
+        else:
+            print(f"Channel layout: {channel_layout}")
 
         if os.path.exists(os.path.join(OUTPUT_PATH, FILE_NAME)):
             print("Working dir already exists.")
@@ -343,14 +459,21 @@ def main():
             os.mkdir(os.path.join(OUTPUT_PATH, FILE_NAME))
             print("Working dir created.")
 
+        stream_info = get_audio_stream_info()
+
         global BIT_DEPTH, CODEC
-        BIT_DEPTH = get_bit_depth()
-        CODEC = get_codec()
+        BIT_DEPTH = get_bit_depth(stream_info)
+        CODEC = get_codec(stream_info)
 
         split_channels(channel_layout)
     else:
         if channels is not None and channels > 8:
             print("Too many channels! You need to downmix to 7.1 :)")
+        elif channels == 8:
+            print(
+                "Unknown 8-channel layout. Use --layout 7.1 or "
+                "--layout ortf-3d."
+            )
         else:
             print("Failed to retrieve channel information.")
 
